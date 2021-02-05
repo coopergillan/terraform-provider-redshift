@@ -113,7 +113,7 @@ output "testdb_name" {
 ```terraform
 data "terraform_remote_state" "redshift" {
   backend = "s3"
-  config {
+  config = {
     bucket = "somebucket"
     key = "somekey"
     region = "us-east-1"
