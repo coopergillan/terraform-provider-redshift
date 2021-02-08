@@ -33,9 +33,9 @@ Download for amd64 (for other architectures and OSes you can build from source a
 
 ```terraform
 provider redshift {
-  url = "localhost",
-  user = "testroot",
-  password = "Rootpass123",
+  url = "localhost"
+  user = "testroot"
+  password = "Rootpass123"
   database = "dev"
 }
 ```
@@ -70,8 +70,8 @@ resource "redshift_group" "testgroup" {
 
 ```terraform
 resource "redshift_schema" "testschema" {
-  schema_name = "testschema", # Schema names are not immutable
-  owner = "${redshift_user.testuser.id}", # This defaults to the current user (eg as specified in the provider config) if empty
+  schema_name = "testschema"  # Schema names are not immutable
+  owner = "${redshift_user.testuser.id}"  # This defaults to the current user (eg as specified in the provider config) if empty
   cascade_on_delete = true
 }
 ```
@@ -98,8 +98,8 @@ specifiy the name directly rather than as a variable, since providers are config
 
 ```terraform
 resource "redshift_database" "testdb" {
-  database_name = "testdb", # This isn't immutable
-  owner = "${redshift_user.testuser.id}",
+  database_name = "testdb"  # This isn't immutable
+  owner = "${redshift_user.testuser.id}"
   connection_limit = "4"
 }
 
@@ -121,9 +121,9 @@ data "terraform_remote_state" "redshift" {
 }
 
 provider redshift {
-  url = "localhost",
-  user = "testroot",
-  password = "Rootpass123",
+  url = "localhost"
+  user = "testroot"
+  password = "Rootpass123"
   database = "${data.terraform_remote_state.redshift.testdb_name}"
 }
 ```
@@ -132,7 +132,7 @@ provider redshift {
 
 ```terraform
 resource "redshift_user" "testuser" {
-  username = "testusernew",
+  username = "testusernew"
   password_disabled = true # No need to specify a password if this is true
   connection_limit = "1"
 }
