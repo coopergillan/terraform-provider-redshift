@@ -21,9 +21,6 @@ jobs:
     - name: Check formatting
       run: sh -c ./scripts/gofmtcheck.sh
 
-    - name: Check for errors
-      run: sh -c ./scripts/errcheck.sh
-      
     - name: Run the tests
       run: go test -v ./redshift
 
