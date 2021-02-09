@@ -1,4 +1,4 @@
-name: Go
+name: Go project
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  build:
+  format_test_and_build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
