@@ -149,6 +149,20 @@ The easiest thing is probably to update your hosts file so that the url resolves
 1. [Go installed](https://golang.org/dl/)
 2. [Terraform installed locally](https://www.terraform.io/downloads.html)
 
+### Testing
+
+Run the tests
+
+```bash
+make test
+```
+
+Find unchecked errors
+
+```bash
+make errcheck
+```
+
 ### Building
 Run `make dist` to generate binaries for the supported os/architectures. This
 process relies on GNUMake and bash, but you can always fallback to generating
