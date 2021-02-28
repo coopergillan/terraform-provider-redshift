@@ -1,8 +1,6 @@
 # Terraform Redshift Provider
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/076b7e35151040f1802b500f218950d1)](https://www.codacy.com/app/frankfarrell/terraform-provider-redshift?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=frankfarrell/terraform-provider-redshift&amp;utm_campaign=Badge_Grade)
-[![Build Status](https://travis-ci.org/frankfarrell/terraform-provider-redshift.svg?branch=master)](https://travis-ci.org/frankfarrell/terraform-provider-redshift)
-[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.svg)](https://gitter.im/terraform-redshift-provider)
+[![Build Status](https://github.com/coopergillan/terraform-provider-redshift/actions/workflows/go.yml/badge.svg)
 
 Manage Redshift users, groups, privileges, databases and schemas. It runs the SQL queries necessary to manage these (CREATE USER, DELETE DATABASE etc)
 in transactions, and also reads the state from the tables that store this state, eg `pg_user_info`, `pg_group` etc. The underlying tables are more or less equivalent to the postgres tables,
