@@ -1,4 +1,4 @@
-module github.com/frankfarrell/terraform-provider-redshift
+module github.com/coopergillan/terraform-provider-redshift
 
 go 1.12
 
