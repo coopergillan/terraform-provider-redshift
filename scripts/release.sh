@@ -2,7 +2,7 @@
 
 set -e # autofail on first error
 
-PROJECT_URL_REGEX=https:\\/\\/github.com\\/frankfarrell\\/terraform-provider-redshift
+PROJECT_URL_REGEX=https:\\/\\/github.com\\/coopergillan\\/terraform-provider-redshift
 VERSION=$(cat VERSION | tr -d "\n")
 
 if grep -q $VERSION CHANGELOG.md; then
