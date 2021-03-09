@@ -18,6 +18,10 @@ jobs:
           - 1.14
           - 1.15
           - 1.16
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
     steps:
     - uses: actions/checkout@v2
 
