@@ -138,9 +138,10 @@ func readRedshiftSchema(d *schema.ResourceData, db *sql.DB) error {
 	)
 
 	err := db.QueryRow(`
-			select trim(nspname) as nspname, nspowner, coalesce(quota, 0) as quota from pg_namespace
-			left join svv_schema_quota_state on svv_schema_quota_state.schema_id = pg_namespace.oid
-			where pg_namespace.oid = $1`, d.Id()).Scan(&schemaName, &owner, &quota)
+			SELECT trim(nspname) AS nspname, nspowner, coalesce(quota, 0) AS quota
+			FROM pg_namespace LEFT JOIN svv_schema_quota_state
+				ON svv_schema_quota_state.schema_id = pg_namespace.oid
+			WHERE pg_namespace.oid = $1`, d.Id()).Scan(&schemaName, &owner, &quota)
 
 	if err != nil {
 		log.Print(err)
