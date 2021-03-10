@@ -3,6 +3,7 @@ package redshift
 import (
 	"database/sql"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -42,6 +43,12 @@ func redshiftSchema() *schema.Resource {
 				Description: "Keyword that indicates to automatically drop all objects in the schema, such as tables and functions. By default it doesn't for your safety",
 				Default:     false,
 			},
+			"quota": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "In megabytes, the maximum amount of disk space that the specified schema can use",
+				Default:     0,
+			},
 		},
 	}
 }
@@ -73,10 +80,17 @@ func resourceRedshiftSchemaCreate(d *schema.ResourceData, meta interface{}) erro
 
 	var createStatement string = "CREATE SCHEMA " + d.Get("schema_name").(string)
 
-	//If no owner is specified it defaults to client user
+	//If an owner is specified, set authorization with mapped username
 	if v, ok := d.GetOk("owner"); ok {
 		var usernames = GetUsersnamesForUsesysid(redshiftClient, []interface{}{v.(int)})
 		createStatement += " AUTHORIZATION " + usernames[0]
+	}
+
+	//If no quota is specified it defaults to unlimited
+	if v, ok := d.GetOk("quota"); ok && v.(int) != 0 {
+		createStatement += " QUOTA " + strconv.Itoa(v.(int)) + " MB"
+	} else {
+		createStatement += " QUOTA UNLIMITED"
 	}
 
 	log.Print("Create Schema statement: " + createStatement)
@@ -120,9 +134,13 @@ func readRedshiftSchema(d *schema.ResourceData, db *sql.DB) error {
 	var (
 		schemaName string
 		owner      int
+		quota      int
 	)
 
-	err := db.QueryRow("select nspname, nspowner from pg_namespace where oid = $1", d.Id()).Scan(&schemaName, &owner)
+	err := db.QueryRow(`
+			select trim(nspname) as nspname, nspowner, coalesce(quota, 0) as quota from pg_namespace
+			left join svv_schema_quota_state on svv_schema_quota_state.schema_id = pg_namespace.oid
+			where pg_namespace.oid = $1`, d.Id()).Scan(&schemaName, &owner, &quota)
 
 	if err != nil {
 		log.Print(err)
@@ -131,6 +149,7 @@ func readRedshiftSchema(d *schema.ResourceData, db *sql.DB) error {
 
 	d.Set("schema_name", schemaName)
 	d.Set("owner", owner)
+	d.Set("quota", quota)
 
 	return nil
 }
@@ -158,6 +177,18 @@ func resourceRedshiftSchemaUpdate(d *schema.ResourceData, meta interface{}) erro
 		var username = GetUsersnamesForUsesysid(redshiftClient, []interface{}{d.Get("owner").(int)})
 
 		if _, err := tx.Exec("ALTER SCHEMA " + d.Get("schema_name").(string) + " OWNER TO " + username[0]); err != nil {
+			return err
+		}
+	}
+
+	if d.HasChange("quota") {
+		quota := "UNLIMITED"
+
+		if v, ok := d.GetOk("quota"); ok && v.(int) != 0 {
+			quota = strconv.Itoa(v.(int)) + " MB"
+		}
+
+		if _, err := tx.Exec("ALTER SCHEMA " + d.Get("schema_name").(string) + " QUOTA " + quota); err != nil {
 			return err
 		}
 	}

@@ -16,6 +16,10 @@ date.
 Note that schemas are the lowest level of granularity here. Tables should be
 created by some other tool, for instance flyway.
 
+# Support
+
+This module supports terraform version >0.12 for Redshift versions >1.0.14677.
+
 # Get it:
 
 1. Navigate to the [releases] and download the desired plugin binary, likely the latest
@@ -72,8 +76,12 @@ resource "redshift_schema" "testschema" {
   schema_name = "testschema"  # Schema names are not immutable
   owner = "${redshift_user.testuser.id}"  # This defaults to the current user (eg as specified in the provider config) if empty
   cascade_on_delete = true
+  quota = 2048  # in MB
 }
 ```
+
+Note that quotas can either be 0 (unlimited) or [some number greater than the
+Redshift minimums][redshift-schema-parameters].
 
 ### Give that group select, insert and references privileges on that schema
 
@@ -213,3 +221,4 @@ Navigate to the [project tag](https://github.com/coopergillan/terraform-provider
 
 [installing_plugin]: https://www.terraform.io/docs/extend/how-terraform-works.html#implied-local-mirror-directories
 [releases]: https://github.com/coopergillan/terraform-provider-redshift/releases
+[redshift-schema-parameters]: https://docs.aws.amazon.com/redshift/latest/dg/r_CREATE_SCHEMA.html#r_CREATE_SCHEMA-parameters
