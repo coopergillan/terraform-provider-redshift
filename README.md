@@ -199,22 +199,24 @@ $ TF_LOG=DEBUG terraform apply
 ```
 
 ### Releasing
-If you are cutting a new release, update the `VERSION` file to the new release
-number prior to running `make release`. You will be prompted for the prior
-version to auto-generate a changelog entry. Review the diffs in CHANGELOG.md
-before committing.
 
-Generate binaries hr each system by running `make dist`. Once gathered,
-add a final tag to mark the github SHA for the release:
+Update the `VERSION` file to the new release number, then run `make release`.
+You will be prompted for the prior version to auto-generate a changelog entry.
+Review the diffs in `CHANGELOG.md` before committing.
+
+Create and push a tag using the version in `VERSION`:
 
 ```
 git tag -m $(cat VERSION) $(cat VERSION)
-git push $(cat VERSION)
+git push origin $(cat VERSION)
 ```
 
-Navigate to the [project tag](https://github.com/coopergillan/terraform-provider-redshift/tags) to edit the release. Add the compiled binaries and publish the release.
+This will start a Github Actions workflow defined in `.github/workflows/release.yml`
+that will generate the binaries and create the release. Releases will be automatically
+published [to the Terraform registry](https://registry.terraform.io/providers/coopergillan/redshift/latest).
 
 ## TODO
+
 1. Database property for Schema
 2. Schema privileges on a per user basis
 3. Add privileges for languages and functions
