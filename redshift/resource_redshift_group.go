@@ -100,7 +100,12 @@ func resourceRedshiftGroupCreate(d *schema.ResourceData, meta interface{}) error
 		return readErr
 	}
 
-	tx.Commit()
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		log.Print("Error committing transaction: ", commitErr)
+		return commitErr
+	}
+
 	return nil
 }
 
@@ -121,7 +126,12 @@ func resourceRedshiftGroupRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	tx.Commit()
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		log.Print("Error committing transaction: ", commitErr)
+		return commitErr
+	}
+
 	return nil
 }
 
@@ -212,7 +222,12 @@ func resourceRedshiftGroupUpdate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	tx.Commit()
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		log.Print("Error committing transaction: ", commitErr)
+		return commitErr
+	}
+
 	return nil
 }
 

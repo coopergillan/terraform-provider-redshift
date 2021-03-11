@@ -201,7 +201,12 @@ func resourceRedshiftSchemaUpdate(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	tx.Commit()
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		log.Print("Error committing transaction: ", commitErr)
+		return commitErr
+	}
+
 	return nil
 }
 

@@ -161,7 +161,12 @@ func resourceRedshiftUserCreate(d *schema.ResourceData, meta interface{}) error 
 		return readErr
 	}
 
-	tx.Commit()
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		log.Print("Error committing transaction: ", commitErr)
+		return commitErr
+	}
+
 	return nil
 }
 
@@ -182,7 +187,12 @@ func resourceRedshiftUserRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	tx.Commit()
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		log.Print("Error committing transaction: ", commitErr)
+		return commitErr
+	}
+
 	return nil
 }
 
@@ -302,7 +312,12 @@ func resourceRedshiftUserUpdate(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	tx.Commit()
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		log.Print("Error committing transaction: ", commitErr)
+		return commitErr
+	}
+
 	return nil
 }
 
@@ -449,7 +464,12 @@ func resourceRedshiftUserDelete(d *schema.ResourceData, meta interface{}) error 
 		tx.Rollback()
 	}
 
-	tx.Commit()
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		log.Print("Error committing transaction: ", commitErr)
+		return commitErr
+	}
+
 	return nil
 }
 

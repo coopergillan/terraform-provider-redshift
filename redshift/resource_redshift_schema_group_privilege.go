@@ -178,7 +178,12 @@ func resourceRedshiftSchemaGroupPrivilegeCreate(d *schema.ResourceData, meta int
 		return readErr
 	}
 
-	tx.Commit()
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		log.Print("Error committing transaction: ", commitErr)
+		return commitErr
+	}
+
 	return nil
 }
 
@@ -197,7 +202,12 @@ func resourceRedshiftSchemaGroupPrivilegeRead(d *schema.ResourceData, meta inter
 		return err
 	}
 
-	tx.Commit()
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		log.Print("Error committing transaction: ", commitErr)
+		return commitErr
+	}
+
 	return nil
 }
 
@@ -325,7 +335,12 @@ func resourceRedshiftSchemaGroupPrivilegeUpdate(d *schema.ResourceData, meta int
 		return err
 	}
 
-	tx.Commit()
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		log.Print("Error committing transaction: ", commitErr)
+		return commitErr
+	}
+
 	return nil
 }
 
@@ -367,7 +382,12 @@ func resourceRedshiftSchemaGroupPrivilegeDelete(d *schema.ResourceData, meta int
 		return err
 	}
 
-	tx.Commit()
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		log.Print("Error committing transaction: ", commitErr)
+		return commitErr
+	}
+
 	return nil
 }
 
