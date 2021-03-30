@@ -33,7 +33,7 @@ fmtcheck:
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
-release: dist
+release:
 	@scripts/release.sh
 
 test-compile:
