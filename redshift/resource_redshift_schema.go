@@ -2,6 +2,7 @@ package redshift
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -53,7 +54,7 @@ func redshiftSchema() *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Avoid creating objects if already exists in the DB",
-				Default:     false,
+				Default:     true,
 			},
 		},
 	}
@@ -84,12 +85,16 @@ func resourceRedshiftSchemaCreate(d *schema.ResourceData, meta interface{}) erro
 
 	redshiftClient := meta.(*Client).db
 
-	if d.Get("fail_if_exists").(bool) == true {
+	if d.Get("fail_if_exists").(bool) == false {
 
-		exists, _ := existsSchemaName(redshiftClient, d.Get("schema_name").(string))
+		exists, err := existsSchemaName(redshiftClient, d.Get("schema_name").(string))
+
+		if err != nil {
+			return fmt.Errorf("Could not create redshift schema %s", err)
+		}
 
 		if exists == true {
-			log.Print("Schema Name already created in the database, skipping schema creation")
+			log.Printf("Schema Name %s, already exists in the database, skipping schema creation", d.Get("schema_name").(string))
 			return nil
 		}
 	}
@@ -273,7 +278,7 @@ func existsSchemaName(q Queryer, schemaName string) (bool, error) {
 
 	var name string
 
-	err := q.QueryRow("SELECT groname FROM pg_tables WHERE schemaname = $1", schemaName).Scan(&name)
+	err := q.QueryRow("SELECT schemaname FROM pg_tables WHERE schemaname = $1", schemaName).Scan(&name)
 	switch {
 	case err == sql.ErrNoRows:
 		//Is this a good idea?

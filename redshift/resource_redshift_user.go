@@ -64,6 +64,12 @@ func redshiftUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"fail_if_exists": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Required: false,
+				Default:  true,
+			},
 		},
 	}
 }
@@ -92,6 +98,20 @@ func resourceRedshiftUserCreate(d *schema.ResourceData, meta interface{}) error 
 
 	if txErr != nil {
 		panic(txErr)
+	}
+
+	if d.Get("fail_if_exists").(bool) {
+
+		exists, err := existsUsersName(redshiftClient, d.Get("username").(string))
+
+		if err != nil {
+			return fmt.Errorf("Could not create redshift user: %s", err)
+		}
+
+		if exists == true {
+			log.Printf("Users Name %s, already exists in the database, skipping schema creation", d.Get("username").(string))
+			return nil
+		}
 	}
 
 	var createStatement string = "create user " + d.Get("username").(string) + " with password "
@@ -524,4 +544,19 @@ func GetUsersnamesForUsesysid(q Queryer, usersIdsInterface []interface{}) []stri
 	}
 
 	return usernames
+}
+
+func existsUsersName(q Queryer, userName string) (bool, error) {
+
+	var name string
+
+	err := q.QueryRow("SELECT usename FROM pg_user WHERE usename = $1", userName).Scan(&name)
+	switch {
+	case err == sql.ErrNoRows:
+		//Is this a good idea?
+		return false, err
+	case err != nil:
+		return false, err
+	}
+	return true, nil
 }

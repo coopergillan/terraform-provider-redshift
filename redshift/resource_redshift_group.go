@@ -41,7 +41,7 @@ func redshiftGroup() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Required: false,
-				Default:  false,
+				Default:  true,
 			},
 		},
 	}
@@ -72,9 +72,13 @@ func resourceRedshiftGroupCreate(d *schema.ResourceData, meta interface{}) error
 		panic(txErr)
 	}
 
-	if d.Get("fail_if_exists").(bool) == true {
+	if d.Get("fail_if_exists").(bool) == false {
 
-		exists, _ := existsGroupName(redshiftClient, d.Get("group_name").(string))
+		exists, err := existsGroupName(redshiftClient, d.Get("group_name").(string))
+
+		if err != nil {
+			return fmt.Errorf("Could not create redshift group: %s", err)
+		}
 
 		if exists == true {
 			log.Print("Group already created in the database, skipping group creation")
