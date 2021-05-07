@@ -37,6 +37,12 @@ func redshiftGroup() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeInt},
 			},
+			"fail_if_exists": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Required: false,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -64,6 +70,16 @@ func resourceRedshiftGroupCreate(d *schema.ResourceData, meta interface{}) error
 	tx, txErr := redshiftClient.Begin()
 	if txErr != nil {
 		panic(txErr)
+	}
+
+	if d.Get("fail_if_exists").(bool) == true {
+
+		exists, _ := existsGroupName(redshiftClient, d.Get("group_name").(string))
+
+		if exists == true {
+			log.Print("Group already created in the database, skipping group creation")
+			return nil
+		}
 	}
 
 	var createStatement string = "create group " + d.Get("group_name").(string)
@@ -283,6 +299,21 @@ func GetGroupNameForGroupId(q Queryer, grosysid int) (string, error) {
 		return "", err
 	}
 	return name, nil
+}
+
+func existsGroupName(q Queryer, groname string) (bool, error) {
+
+	var name string
+
+	err := q.QueryRow("SELECT groname FROM pg_group WHERE groname = $1", groname).Scan(&name)
+	switch {
+	case err == sql.ErrNoRows:
+		//Is this a good idea?
+		return false, err
+	case err != nil:
+		return false, err
+	}
+	return true, nil
 }
 
 // Complexity: O(n^2)

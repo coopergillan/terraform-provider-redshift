@@ -49,6 +49,12 @@ func redshiftSchema() *schema.Resource {
 				Description: "In megabytes, the maximum amount of disk space that the specified schema can use",
 				Default:     0,
 			},
+			"fail_if_exists": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Avoid creating objects if already exists in the DB",
+				Default:     false,
+			},
 		},
 	}
 }
@@ -77,6 +83,16 @@ func resourceRedshiftSchemaExists(d *schema.ResourceData, meta interface{}) (b b
 func resourceRedshiftSchemaCreate(d *schema.ResourceData, meta interface{}) error {
 
 	redshiftClient := meta.(*Client).db
+
+	if d.Get("fail_if_exists").(bool) == true {
+
+		exists, _ := existsSchemaName(redshiftClient, d.Get("schema_name").(string))
+
+		if exists == true {
+			log.Print("Schema Name already created in the database, skipping schema creation")
+			return nil
+		}
+	}
 
 	var createStatement string = "CREATE SCHEMA " + d.Get("schema_name").(string)
 
@@ -251,4 +267,20 @@ func GetSchemaInfoForSchemaId(q Queryer, schemaId int) (string, int, error) {
 		return "", -1, err
 	}
 	return name, owner, nil
+}
+
+func existsSchemaName(q Queryer, schemaName string) (bool, error) {
+
+	var name string
+
+	err := q.QueryRow("SELECT groname FROM pg_tables WHERE schemaname = $1", schemaName).Scan(&name)
+	switch {
+	case err == sql.ErrNoRows:
+		//Is this a good idea?
+		return false, err
+	case err != nil:
+		return false, err
+	}
+	return true, nil
+
 }
