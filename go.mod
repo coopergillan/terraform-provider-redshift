@@ -3,8 +3,7 @@ module github.com/coopergillan/terraform-provider-redshift
 go 1.12
 
 require (
-	github.com/hashicorp/terraform v0.12.2
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.4.2
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.4.4
 	github.com/lib/pq v1.1.1
 )
 
