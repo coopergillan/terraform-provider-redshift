@@ -1,6 +1,6 @@
 module github.com/coopergillan/terraform-provider-redshift
 
-go 1.12
+go 1.13
 
 require (
 	github.com/hashicorp/terraform v0.12.2
