@@ -9,7 +9,7 @@ on:
 jobs:
 
   format_test_and_build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         go-version:
