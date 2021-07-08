@@ -2,4 +2,3 @@
 (*database/sql.DB).Close
 (*database/sql.DB).Exec
 (*database/sql.Rows).Close
-(*database/sql.Tx).Rollback

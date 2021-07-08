@@ -157,7 +157,10 @@ func resourceRedshiftUserCreate(d *schema.ResourceData, meta interface{}) error 
 	readErr := readRedshiftUser(d, tx)
 
 	if readErr != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			log.Printf("read Redshift user failed; unable to rollback: %v", rollbackErr)
+		}
+		log.Print(readErr)
 		return readErr
 	}
 
@@ -183,7 +186,10 @@ func resourceRedshiftUserRead(d *schema.ResourceData, meta interface{}) error {
 	err := readRedshiftUser(d, tx)
 
 	if err != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			log.Printf("error reading user: rollback failed: %v", rollbackErr)
+		}
+		log.Print(err)
 		return err
 	}
 
@@ -308,7 +314,10 @@ func resourceRedshiftUserUpdate(d *schema.ResourceData, meta interface{}) error 
 	err := readRedshiftUser(d, tx)
 
 	if err != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			log.Printf("error reading user: rollback failed: %v", rollbackErr)
+		}
+		log.Print(err)
 		return err
 	}
 
@@ -410,7 +419,10 @@ func resourceRedshiftUserDelete(d *schema.ResourceData, meta interface{}) error 
 	defer rows.Close()
 
 	if reassignOwnerStatementErr != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			log.Printf("error reassigning owner: rollback failed: %v", rollbackErr)
+		}
+		log.Print(reassignOwnerStatementErr)
 		return reassignOwnerStatementErr
 	}
 
@@ -423,7 +435,10 @@ func resourceRedshiftUserDelete(d *schema.ResourceData, meta interface{}) error 
 		err := rows.Scan(&reassignStatement)
 		if err != nil {
 			//Im not sure how this can happen
-			tx.Rollback()
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				log.Printf("error running scan for reassigning owner: rollback failed: %v", rollbackErr)
+			}
+			log.Print(err)
 			return err
 		}
 		reassignStatements = append(reassignStatements, reassignStatement)
@@ -434,7 +449,10 @@ func resourceRedshiftUserDelete(d *schema.ResourceData, meta interface{}) error 
 
 		if err != nil {
 			//Im not sure how this can happen
-			tx.Rollback()
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				log.Printf("error reassigning owner: rollback failed: %v", rollbackErr)
+			}
+			log.Print(err)
 			return err
 		}
 	}
@@ -460,8 +478,11 @@ func resourceRedshiftUserDelete(d *schema.ResourceData, meta interface{}) error 
 	_, dropUserErr := tx.Exec("DROP USER " + d.Get("username").(string))
 
 	if dropUserErr != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			log.Printf("drop user failed; unable to rollback: %v", rollbackErr)
+		}
+		log.Print(dropUserErr)
 		return dropUserErr
-		tx.Rollback()
 	}
 
 	commitErr := tx.Commit()

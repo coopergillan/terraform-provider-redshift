@@ -96,7 +96,10 @@ func resourceRedshiftGroupCreate(d *schema.ResourceData, meta interface{}) error
 	readErr := readRedshiftGroup(d, tx)
 
 	if readErr != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			log.Printf("error getting group; unable to rollback: %v", rollbackErr)
+		}
+		log.Print(readErr)
 		return readErr
 	}
 
@@ -122,7 +125,10 @@ func resourceRedshiftGroupRead(d *schema.ResourceData, meta interface{}) error {
 	err := readRedshiftGroup(d, tx)
 
 	if err != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			log.Printf("error reading group: rollback failed: %v", rollbackErr)
+		}
+		log.Print(err)
 		return err
 	}
 
@@ -218,7 +224,10 @@ func resourceRedshiftGroupUpdate(d *schema.ResourceData, meta interface{}) error
 	err := readRedshiftGroup(d, tx)
 
 	if err != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			log.Printf("error reading group: rollback failed: %v", rollbackErr)
+		}
+		log.Print(err)
 		return err
 	}
 
